@@ -1,0 +1,86 @@
+C:\Users\jdipa\OneDrive\Desktop\projects\ClearTrace (2)\ClearTrace\app.py:35: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+  GenAI:               Auto-detecting available models...
+  GenAI:               Detected: 31 models
+  GenAI:               [OK] Successfully bound to models/gemini-flash-latest
+
+============================================================
+  ClearTrace – Investigation System
+============================================================
+  Customers loaded:    40
+  Merchants loaded:    20
+  Transactions loaded: 80
+  GenAI:               [OK] Gemini configured
+============================================================
+  Open http://localhost:5000 in your browser
+============================================================
+
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5001
+Press CTRL+C to quit
+ * Restarting with stat
+C:\Users\jdipa\OneDrive\Desktop\projects\ClearTrace (2)\ClearTrace\app.py:35: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+  GenAI:               Auto-detecting available models...
+  GenAI:               Detected: 31 models
+  GenAI:               [OK] Successfully bound to models/gemini-flash-latest
+
+============================================================
+  ClearTrace – Investigation System
+============================================================
+  Customers loaded:    40
+  Merchants loaded:    20
+  Transactions loaded: 80
+  GenAI:               [OK] Gemini configured
+============================================================
+  Open http://localhost:5000 in your browser
+============================================================
+
+ * Debugger is active!
+ * Debugger PIN: 743-660-344
+127.0.0.1 - - [24/Mar/2026 00:38:52] "GET /api/upi-graph HTTP/1.1" 404 -
+ * Detected change in 'C:\\Users\\jdipa\\OneDrive\\Desktop\\projects\\ClearTrace (2)\\ClearTrace\\app.py', reloading
+ * Restarting with stat
+C:\Users\jdipa\OneDrive\Desktop\projects\ClearTrace (2)\ClearTrace\app.py:35: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+  GenAI:               Auto-detecting available models...
+  GenAI:               Detected: 31 models
+  GenAI:               [OK] Successfully bound to models/gemini-flash-latest
+
+============================================================
+  ClearTrace – Investigation System
+============================================================
+  Customers loaded:    40
+  Merchants loaded:    20
+  Transactions loaded: 80
+  GenAI:               [OK] Gemini configured
+============================================================
+  Open http://localhost:5000 in your browser
+============================================================
+
+ * Debugger is active!
+ * Debugger PIN: 743-660-344
+^C

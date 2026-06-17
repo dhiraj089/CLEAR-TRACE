@@ -48,9 +48,8 @@ VOICE_DIR.mkdir(exist_ok=True)
 DB_PATH = "cleartrace.db"
 
 # ── Gemini Setup ──
-GEMINI_API_KEY = "AIzaSyAA75sz8tcbG9vFTvBvwS77eznM6M1oMmo"
+GEMINI_API_KEY = "AIzaSyD8ySBA0kSaSNjaGgGUMuGT3NGSCIK3jA0"
 gemini_model = None
-
 def init_gemini(api_key=None):
     global GEMINI_API_KEY, gemini_model
     key = api_key or GEMINI_API_KEY
@@ -72,12 +71,12 @@ def init_gemini(api_key=None):
                             test_model = genai.GenerativeModel(m_name)
                             test_model.generate_content("ping", generation_config={"max_output_tokens": 1})
                             gemini_model = test_model
-                            print(f"  GenAI:               ✓ Successfully bound to {m_name}")
+                            print(f"  GenAI:               [OK] Successfully bound to {m_name}")
                             return True
                         except:
                             continue
         except Exception as e:
-            print(f"  GenAI:               ✗ Model discovery failed: {str(e)[:50]}")
+            print(f"  GenAI:               [FAIL] Model discovery failed: {str(e)[:50]}")
             
         return False
     return False
@@ -2116,6 +2115,136 @@ def api_chatbot_query():
         "entities_found": found_entities
     })
 
+@app.route("/api/upi-graph", methods=["GET"])
+def api_upi_graph():
+    """Generates a graph of customers and merchants with transaction chains."""
+    global customers_df, merchants_df, transactions_df
+    
+    focus_id = request.args.get("focus")
+    
+    # Build fast lookup maps
+    customer_map = {row["customer_uuid"]: row for _, row in customers_df.iterrows()}
+    merchant_map = {row["merchant_uuid"]: row for _, row in merchants_df.iterrows()}
+    
+    all_nodes = {}
+    all_edges = []
+    
+    # 1. Build all potential nodes and edges
+    # Use sets to track which nodes are actually needed if we have a focus
+    
+    # Pre-determine flagged customers (to avoid re-calculating in BFS)
+    # We only call detect_anomalies once per customer
+    customer_flagged = {}
+    for cid, c in customer_map.items():
+        is_blocked = str(c.get("is_account_blocked", "False")).lower() == "true"
+        if is_blocked:
+            customer_flagged[cid] = True
+        else:
+            _, _, anoms = detect_anomalies(customer_uuid=cid)
+            customer_flagged[cid] = len(anoms) > 0
+
+    # Add Merchants to all_nodes
+    for mid, m in merchant_map.items():
+        nid = f"m_{mid}"
+        all_nodes[nid] = {
+            "id": nid, "type": "custom", "position": {"x": 0, "y": 0},
+            "data": {"name": m["merchant_name"], "upi": m["merchant_upi_id"], "flagged": False, "type": "merchant"}
+        }
+    
+    # Add Customers to all_nodes
+    for cid, c in customer_map.items():
+        nid = f"c_{cid}"
+        all_nodes[nid] = {
+            "id": nid, "type": "custom", "position": {"x": 0, "y": 0},
+            "data": {"name": c["full_name"], "upi": c["upi_id"], "flagged": customer_flagged.get(cid, False), "type": "customer"}
+        }
+
+    # Add Transactions to all_edges
+    for _, t in transactions_df.iterrows():
+        c_node = f"c_{t['customer_uuid']}"
+        m_node = f"m_{t['merchant_uuid']}"
+        u_source, u_target = (m_node, c_node) if t["transaction_type"] == "CREDIT" else (c_node, m_node)
+        
+        is_anomaly = t.get("anomaly_flag", "NONE") != "NONE"
+        amount = f"₹{float(t['transaction_amount']):,.2f}"
+        
+        all_edges.append({
+            "id": f"e_{t['transaction_uuid']}",
+            "source": u_source, "target": u_target, "label": amount,
+            "animated": is_anomaly, "type": "smoothstep",
+            "style": {"stroke": "#CC0000" if is_anomaly else "#9CA3AF", "strokeWidth": 2 if is_anomaly else 1.5},
+            "labelStyle": {"fill": "#CC0000" if is_anomaly else "#6B7280", "fontSize": 10, "fontWeight": "bold" if is_anomaly else "normal"}
+        })
+
+    # 2. Filtering Logic
+    final_nodes = {}
+    final_edges = []
+    
+    if focus_id:
+        target_id = None
+        # Fast lookup for target_id
+        if focus_id in customer_map:
+            target_id = f"c_{focus_id}"
+        elif focus_id in merchant_map:
+            target_id = f"m_{focus_id}"
+        else:
+            # Check UPI IDs
+            for cid, c in customer_map.items():
+                if c["upi_id"] == focus_id:
+                    target_id = f"c_{cid}"
+                    break
+            if not target_id:
+                for mid, m in merchant_map.items():
+                    if m["merchant_upi_id"] == focus_id:
+                        target_id = f"m_{mid}"
+                        break
+        
+        if target_id and target_id in all_nodes:
+            # BFS 2 hops
+            levels = {target_id: 0}
+            queue = [target_id]
+            final_nodes[target_id] = all_nodes[target_id]
+            
+            # Pre-group edges by source and target for faster BFS
+            adj = {}
+            for e in all_edges:
+                adj.setdefault(e["source"], []).append(e)
+                adj.setdefault(e["target"], []).append(e)
+                
+            while queue:
+                curr = queue.pop(0)
+                if levels[curr] >= 2: continue
+                for e in adj.get(curr, []):
+                    other = e["target"] if e["source"] == curr else e["source"]
+                    if other not in levels:
+                        levels[other] = levels[curr] + 1
+                        final_nodes[other] = all_nodes[other]
+                        queue.append(other)
+            
+            for e in all_edges:
+                if e["source"] in final_nodes and e["target"] in final_nodes:
+                    final_edges.append(e)
+        else:
+            final_nodes, final_edges = all_nodes, all_edges
+    else:
+        final_nodes, final_edges = all_nodes, all_edges
+
+    # 3. Layout Logic
+    node_list = list(final_nodes.values())
+    in_degree = {nid: 0 for nid in final_nodes}
+    out_degree = {nid: 0 for nid in final_nodes}
+    for e in final_edges:
+        if e["target"] in in_degree: in_degree[e["target"]] += 1
+        if e["source"] in out_degree: out_degree[e["source"]] += 1
+        
+    layer_counts = {0: 0, 1: 0, 2: 0}
+    for node in node_list:
+        nid = node["id"]
+        lyr = 1 if in_degree[nid] > 0 and out_degree[nid] > 0 else (2 if in_degree[nid] > 0 else 0)
+        node["position"] = {"x": lyr * 400, "y": layer_counts[lyr] * 150}
+        layer_counts[lyr] += 1
+        
+    return jsonify(sanitize_nan({"nodes": node_list, "edges": final_edges}))
 # ══════════════════════════════════════════════════════════════
 # Main
 # ══════════════════════════════════════════════════════════════
@@ -2127,10 +2256,11 @@ if __name__ == "__main__":
     print(f"  Merchants loaded:    {len(merchants_df)}")
     print(f"  Transactions loaded: {len(transactions_df)}")
     if GEMINI_API_KEY:
-        print("  GenAI:               ✓ Gemini configured")
+        print("  GenAI:               [OK] Gemini configured")
     else:
-        print("  GenAI:               ✗ Set GEMINI_API_KEY or use 'setkey:YOUR_KEY' in chat")
+        print("  GenAI:               [FAIL] Set GEMINI_API_KEY or use 'setkey:YOUR_KEY' in chat")
     print("="*60)
     print("  Open http://localhost:5000 in your browser")
     print("="*60 + "\n")
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("FLASK_RUN_PORT", 5000))
+    app.run(debug=True, port=port)

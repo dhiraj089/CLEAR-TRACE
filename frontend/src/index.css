@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
-  --pri-red: #c90000;
+  --pri-red: #CC0000;
   --dark-red: #8b0000;
   --light-red: #ffebec;
   --bg-color: #fdfdfd;
   --text-dark: #333;
   --text-dim: #888;
-  --grid-color: rgba(201, 0, 0, 0.08);
+  --grid-color: rgba(204, 0, 0, 0.08);
 }
 
 * {
@@ -35,7 +35,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 80px;
+  width: 60px;
   background-color: var(--pri-red);
   display: flex;
   flex-direction: column;

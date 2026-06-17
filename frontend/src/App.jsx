@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, MessageSquare, Clock, Landmark, Shield } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Clock, Landmark, Shield, Network } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import Investigate from './pages/Investigate';
 import Chatbot from './pages/Chatbot';
 import Cheques from './pages/Cheques';
+import UpiGraph from './pages/UpiGraph';
 
 function Sidebar() {
   const location = useLocation();
@@ -29,6 +30,10 @@ function Sidebar() {
         <Landmark size={20} />
       </Link>
 
+      <Link to="/upi-graph" className={`nav-item ${path === '/upi-graph' ? 'active' : ''}`} title="UPI Graph Explorer">
+        <Network size={20} />
+      </Link>
+
       <Link to="/" className={`nav-item ${path === '/' ? 'active' : ''}`} title="Insights">
         <LayoutDashboard size={20} />
       </Link>
@@ -50,8 +55,8 @@ function Topbar() {
         </div>
         <div style={{ height: '30px', width: '1px', backgroundColor: '#eee', margin: '0 10px' }}></div>
         <div className="officer-info">
-          Officer: <span className="officer-name">R. MEHTA</span>
-          <div className="officer-avatar">R</div>
+          Officer: <span className="officer-name">D. JADHAV</span>
+          <div className="officer-avatar">D</div>
         </div>
       </div>
     </div>
@@ -70,6 +75,7 @@ function App() {
             <Route path="/chatbot" element={<Chatbot />} />
             <Route path="/history" element={<History />} />
             <Route path="/cheques" element={<Cheques />} />
+            <Route path="/upi-graph" element={<UpiGraph />} />
             <Route path="/customer_summary" element={<Investigate />} />
             <Route path="*" element={<div style={{ padding: '40px' }}>Under Construction</div>} />
           </Routes>
