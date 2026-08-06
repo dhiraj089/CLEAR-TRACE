@@ -174,8 +174,6 @@ ClearTrace/
 └── README.md
 ```
 
----
-
 ## Screenshots
 
 📸 Add screenshots of:
@@ -212,8 +210,6 @@ A.P. Shah Institute of Technology (APSIT)
 
 Skills:
 Python | Machine Learning | Data Analytics | Artificial Intelligence
-
----
 
 ## Conclusion
 
