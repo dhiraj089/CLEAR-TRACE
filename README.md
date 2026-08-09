@@ -14,8 +14,6 @@ With the rapid growth of online banking and digital payments, fraudulent transac
 
 ClearTrace solves this problem by leveraging Machine Learning techniques to analyze transaction behavior and detect potentially fraudulent activities.
 
----
-
 ## Features
 
 🔍 Automated fraud transaction detection  
