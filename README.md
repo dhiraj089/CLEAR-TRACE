@@ -6,7 +6,6 @@ ClearTrace is an AI-powered banking fraud detection system that uses Machine Lea
 
 The system analyzes transaction patterns, detects anomalies, and generates fraud predictions to help improve financial security and reduce risks associated with digital banking fraud.
 
----
 
 ## Problem Statement
 
